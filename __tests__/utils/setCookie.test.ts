@@ -57,6 +57,13 @@ describe('setCookie', () => {
     expect(res.setHeader).toHaveBeenCalledWith('Set-Cookie', 'name=value; Secure');
   });
 
+  // Test case: should set a cookie with sameSite
+  it('should set a cookie with secure', () => {
+    setCookie(res, 'name', 'value', { sameSite: 'None' });
+
+    expect(res.setHeader).toHaveBeenCalledWith('Set-Cookie', 'name=value; SameSite=None');
+  });
+
   // Test case: should set a cookie with multiple options
   it('should set a cookie with multiple options', () => {
     const expires = new Date();
@@ -66,11 +73,12 @@ describe('setCookie', () => {
       expires,
       httpOnly: true,
       secure: true,
+      sameSite: 'None',
     });
 
     expect(res.setHeader).toHaveBeenCalledWith(
       'Set-Cookie',
-      `name=value; Domain=example.com; Path=/path; Expires=${expires.toUTCString()}; HttpOnly; Secure`,
+      `name=value; Domain=example.com; Path=/path; Expires=${expires.toUTCString()}; HttpOnly; Secure; SameSite=None`,
     );
   });
 });

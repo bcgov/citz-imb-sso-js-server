@@ -1,16 +1,11 @@
+import { SetCookieOptions } from '../types';
 import { ServerResponse } from 'http';
 
 export const setCookie = (
   res: ServerResponse,
   name: string,
   value: string,
-  options: {
-    domain?: string;
-    path?: string;
-    expires?: Date;
-    httpOnly?: boolean;
-    secure?: boolean;
-  } = {},
+  options: SetCookieOptions = {},
 ): void => {
   let cookie = `${name}=${encodeURIComponent(value)}`;
 
@@ -32,6 +27,10 @@ export const setCookie = (
 
   if (options.secure) {
     cookie += `; Secure`;
+  }
+
+  if (options.sameSite) {
+    cookie += `; SameSite=${options.sameSite}`;
   }
 
   res.setHeader('Set-Cookie', cookie);

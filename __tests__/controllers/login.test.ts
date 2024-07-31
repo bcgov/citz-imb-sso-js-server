@@ -2,6 +2,7 @@ import { IncomingMessage, ServerResponse } from 'http';
 import { parse } from 'url';
 import { getLoginURL } from '@bcgov/citz-imb-sso-js-core';
 import { login } from '@/controllers';
+import { setCookie } from '@/utils';
 
 jest.mock('url', () => ({
   parse: jest.fn(),
@@ -18,9 +19,13 @@ jest.mock('@/config', () => ({
   SSO_CLIENT_ID: 'client_id',
 }));
 
+jest.mock('@/utils', () => ({
+  setCookie: jest.fn(),
+}));
+
 // Test suite for login function
 describe('login function', () => {
-  let req: IncomingMessage;
+  let req: IncomingMessage & { token?: string };
   let res: ServerResponse;
 
   beforeEach(() => {
@@ -29,7 +34,7 @@ describe('login function', () => {
       headers: {
         cookie: '',
       },
-    } as IncomingMessage;
+    } as IncomingMessage & { token?: string };
 
     res = {
       setHeader: jest.fn(),
@@ -54,13 +59,12 @@ describe('login function', () => {
     expect(getLoginURL).toHaveBeenCalledWith({
       idpHint: 'someIdp',
       clientID: 'client_id',
-      redirectURI: `http://localhost:5000/auth/login/callback`,
+      redirectURI: 'http://localhost:5000/auth/login/callback',
     });
 
-    expect(res.setHeader).toHaveBeenCalledWith(
-      'Set-Cookie',
-      `post_login_redirect_url=http%3A%2F%2Fredirect.url; Domain=localhost`,
-    );
+    expect(setCookie).toHaveBeenCalledWith(res, 'post_login_redirect_url', 'http://redirect.url', {
+      domain: 'localhost',
+    });
 
     expect(res.writeHead).toHaveBeenCalledWith(302, { Location: 'http://login.url' });
     expect(res.end).toHaveBeenCalled();
@@ -68,7 +72,7 @@ describe('login function', () => {
 
   // Test case: should redirect when token is present
   it('should redirect when token is present', async () => {
-    req.headers.cookie = 'token=someToken';
+    req.token = 'someToken';
 
     await login(req, res);
 
@@ -87,5 +91,18 @@ describe('login function', () => {
 
     expect(res.setHeader).toHaveBeenCalledWith('Content-Type', 'application/json');
     expect(res.end).toHaveBeenCalledWith(JSON.stringify({ success: false, error: error.message }));
+  });
+
+  // Test case: should handle unexpected errors and respond with JSON
+  it('should handle unexpected errors and respond with JSON', async () => {
+    const error = 'Unexpected error';
+    (getLoginURL as jest.Mock).mockImplementation(() => {
+      throw error;
+    });
+
+    await login(req, res);
+
+    expect(res.setHeader).toHaveBeenCalledWith('Content-Type', 'application/json');
+    expect(res.end).toHaveBeenCalledWith(JSON.stringify({ success: false, error }));
   });
 });

@@ -3,6 +3,7 @@
 import type { IncomingMessage, ServerResponse } from 'http';
 import { parse } from 'url';
 import { SSOOptions } from '../types';
+import { setCookie } from '../utils';
 import type { SSOEnvironment, SSOIdentityProvider, SSOProtocol } from '@bcgov/citz-imb-sso-js-core';
 import { getLoginURL } from '@bcgov/citz-imb-sso-js-core';
 
@@ -36,13 +37,11 @@ export const login = async (req: IncomingMessage, res: ServerResponse, options?:
       ssoProtocol: SSO_PROTOCOL as SSOProtocol,
     });
 
-    if (!req.headers.cookie || !req.headers.cookie.includes('token')) {
+    if (!req.token) {
       // Set cookie
-      const cookieParts = [
-        `post_login_redirect_url=${encodeURIComponent(post_login_redirect_url as string)}`,
-      ];
-      cookieParts.push(`Domain=${COOKIE_DOMAIN}`);
-      res.setHeader('Set-Cookie', cookieParts.join('; '));
+      setCookie(res, 'post_login_redirect_url', post_login_redirect_url as string, {
+        domain: COOKIE_DOMAIN,
+      });
 
       res.writeHead(302, { Location: redirectURL });
       return res.end();

@@ -22,6 +22,9 @@
     "coverage": "jest --coverage --passWithNoTests",
     "coverage:open": "node scripts/run-coverage-and-open-report.mjs"
   },
+  "dependencies": {
+    "@bcgov/citz-imb-sso-js-core": "file:./js-core.tgz"
+  },
   "devDependencies": {
     "@rollup/plugin-commonjs": "26.0.1",
     "@rollup/plugin-json": "6.1.0",

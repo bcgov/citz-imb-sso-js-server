@@ -19,6 +19,10 @@ export type SetCookieOptions = {
   sameSite?: 'Strict' | 'Lax' | 'None';
 };
 
+export type ProtectedRouteOptions = {
+  requireAllRoles?: boolean;
+};
+
 declare module 'http' {
   interface IncomingMessage {
     token?: string;

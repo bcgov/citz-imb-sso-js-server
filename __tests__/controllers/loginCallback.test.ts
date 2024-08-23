@@ -1,7 +1,7 @@
 import { IncomingMessage, ServerResponse } from 'http';
 import { parse } from 'url';
 import { SSOOptions } from '@/types';
-import { parseCookies, setCookie } from '@/utils';
+import { parseCookies, formatCookie } from '@/utils';
 import { decodeJWT, getTokens, normalizeUser } from '@bcgov/citz-imb-sso-js-core';
 import config from '@/config';
 import { loginCallback } from '@/controllers';
@@ -12,7 +12,7 @@ jest.mock('url', () => ({
 
 jest.mock('@/utils', () => ({
   parseCookies: jest.fn(),
-  setCookie: jest.fn(),
+  formatCookie: jest.fn(),
 }));
 
 jest.mock('@bcgov/citz-imb-sso-js-core', () => ({
@@ -86,8 +86,12 @@ describe('loginCallback function', () => {
 
     const redirectURL = `${config.FRONTEND_URL}?refresh_expires_in=3600&post_login_redirect_url=http://redirect.url`;
 
-    expect(setCookie).toHaveBeenCalledWith(res, 'refresh_token', 'refresh_token', {
+    expect(formatCookie).toHaveBeenCalledWith('refresh_token', 'refresh_token', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'None',
       domain: config.COOKIE_DOMAIN,
+      path: '/',
     });
 
     expect(res.writeHead).toHaveBeenCalledWith(302, { Location: redirectURL });

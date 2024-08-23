@@ -1,2 +1,2 @@
 export * from './parseCookies';
-export * from './setCookie';
+export * from './formatCookie';

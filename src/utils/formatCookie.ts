@@ -1,13 +1,11 @@
 import { SetCookieOptions } from '../types';
-import { ServerResponse } from 'http';
 
-export const setCookie = (
-  res: ServerResponse,
+export const formatCookie = (
   name: string,
   value: string,
   options: SetCookieOptions = {},
-): void => {
-  let cookie = `${name}=${encodeURIComponent(value)}`;
+): string => {
+  let cookie = `${name}=${value}`;
 
   if (options.domain) {
     cookie += `; Domain=${options.domain}`;
@@ -33,5 +31,5 @@ export const setCookie = (
     cookie += `; SameSite=${options.sameSite}`;
   }
 
-  res.setHeader('Set-Cookie', cookie);
+  return cookie;
 };

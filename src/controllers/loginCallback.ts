@@ -3,7 +3,7 @@
 import type { IncomingMessage, ServerResponse } from 'http';
 import { parse } from 'url';
 import { SSOOptions } from '../types';
-import { parseCookies, setCookie } from '../utils';
+import { parseCookies, formatCookie } from '../utils';
 import type { OriginalSSOUser, SSOEnvironment, SSOProtocol } from '@bcgov/citz-imb-sso-js-core';
 import { decodeJWT, getTokens, normalizeUser } from '@bcgov/citz-imb-sso-js-core';
 
@@ -49,9 +49,14 @@ export const loginCallback = async (
     const redirectURL = `${FRONTEND_URL}?refresh_expires_in=${refresh_expires_in}&post_login_redirect_url=${post_login_redirect_url}`;
 
     // Set cookie
-    setCookie(res, 'refresh_token', refresh_token as string, {
+    const cookie = formatCookie('refresh_token', refresh_token as string, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'None',
       domain: COOKIE_DOMAIN,
+      path: '/',
     });
+    res.setHeader('Set-Cookie', cookie);
 
     res.writeHead(302, { Location: redirectURL });
 

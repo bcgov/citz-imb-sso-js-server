@@ -42,6 +42,7 @@ describe('SSO class', () => {
     req = {};
     res = {
       end: jest.fn(),
+      setHeader: jest.fn(),
       writeHead: jest.fn(),
     };
     options = {};

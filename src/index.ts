@@ -9,6 +9,9 @@ export class SSO {
   }
 
   public handleRequest(req: IncomingMessage, res: ServerResponse, options?: SSOOptions) {
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Origin', process.env.FRONTEND_URL ?? '');
+
     if (req.url?.startsWith('/auth/login/callback')) {
       loginCallback(req, res, options); // LOGIN CALLBACK
     } else if (req.url?.startsWith('/auth/login')) {

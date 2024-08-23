@@ -2,7 +2,7 @@ import { IncomingMessage, ServerResponse } from 'http';
 import { parse } from 'url';
 import { getLoginURL } from '@bcgov/citz-imb-sso-js-core';
 import { login } from '@/controllers';
-import { setCookie } from '@/utils';
+import { formatCookie } from '@/utils';
 
 jest.mock('url', () => ({
   parse: jest.fn(),
@@ -20,7 +20,7 @@ jest.mock('@/config', () => ({
 }));
 
 jest.mock('@/utils', () => ({
-  setCookie: jest.fn(),
+  formatCookie: jest.fn(),
 }));
 
 // Test suite for login function
@@ -62,8 +62,9 @@ describe('login function', () => {
       redirectURI: 'http://localhost:5000/auth/login/callback',
     });
 
-    expect(setCookie).toHaveBeenCalledWith(res, 'post_login_redirect_url', 'http://redirect.url', {
+    expect(formatCookie).toHaveBeenCalledWith('post_login_redirect_url', 'http://redirect.url', {
       domain: 'localhost',
+      path: '/',
     });
 
     expect(res.writeHead).toHaveBeenCalledWith(302, { Location: 'http://login.url' });

@@ -25,6 +25,7 @@ export const logout = async (req: IncomingMessage, res: ServerResponse, options?
     const { id_token } = urlParts.query;
 
     if (!id_token) {
+      // TODO: Redirect and clear cookie
       res.writeHead(401, 'id_token query param required');
       return res.end();
     }

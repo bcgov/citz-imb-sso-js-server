@@ -4,7 +4,7 @@ import type { IncomingMessage, ServerResponse } from 'http';
 import { SSOOptions } from '../types';
 
 import config from '../config';
-import { setCookie } from '@/utils';
+import { formatCookie } from '@/utils';
 const { FRONTEND_URL, COOKIE_DOMAIN } = config;
 
 /**
@@ -19,12 +19,14 @@ export const logoutCallback = async (
 ) => {
   try {
     // Set cookie
-    setCookie(res, 'refresh_token', '', {
+    const cookie = formatCookie('refresh_token', '', {
       httpOnly: true,
       secure: true,
       sameSite: 'None',
       domain: COOKIE_DOMAIN,
+      path: '/',
     });
+    res.setHeader('Set-Cookie', cookie);
 
     res.writeHead(302, { Location: FRONTEND_URL });
     return res.end();

@@ -3,6 +3,7 @@ import { parse } from 'url';
 import { decodeJWT, getLogoutURL, normalizeUser } from '@bcgov/citz-imb-sso-js-core';
 import { logout } from '@/controllers';
 import { SSOOptions } from '@/types';
+import { formatCookie } from '@/utils';
 
 jest.mock('url', () => ({
   parse: jest.fn(),
@@ -16,7 +17,12 @@ jest.mock('@bcgov/citz-imb-sso-js-core', () => ({
 
 jest.mock('@/config', () => ({
   BACKEND_URL: 'http://localhost:5000',
+  FRONTEND_URL: 'http://localhost:3000',
   LOGOUT_CALLBACK_ROUTE: '/auth/logout/callback',
+}));
+
+jest.mock('@/utils', () => ({
+  formatCookie: jest.fn(),
 }));
 
 // Test suite for logout function
@@ -72,15 +78,23 @@ describe('logout function', () => {
     expect(afterUserLogout).toHaveBeenCalledWith({});
   });
 
-  // Test case: should return 401 if id_token is not provided
-  it('should return 401 if id_token is not provided', async () => {
+  // Test case: should clear cookie and redirect if id_token is not provided
+  it('should clear cookie and redirect if id_token is not provided', async () => {
     (parse as jest.Mock).mockReturnValue({
       query: {},
     });
 
     await logout(req, res);
 
-    expect(res.writeHead).toHaveBeenCalledWith(401, 'id_token query param required');
+    expect(formatCookie).toHaveBeenCalledWith('refresh_token', '', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'None',
+      domain: '.gov.bc.ca',
+      path: '/',
+    });
+
+    expect(res.writeHead).toHaveBeenCalledWith(302, { Location: 'http://localhost:3000' });
     expect(res.end).toHaveBeenCalled();
   });
 

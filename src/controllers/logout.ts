@@ -10,9 +10,18 @@ import type {
   SSOProtocol,
 } from '@bcgov/citz-imb-sso-js-core';
 import { decodeJWT, getLogoutURL, normalizeUser } from '@bcgov/citz-imb-sso-js-core';
+import { formatCookie } from '../utils';
 
 import config from '../config';
-const { BACKEND_URL, LOGOUT_CALLBACK_ROUTE, SSO_ENVIRONMENT, SSO_REALM, SSO_PROTOCOL } = config;
+const {
+  BACKEND_URL,
+  FRONTEND_URL,
+  LOGOUT_CALLBACK_ROUTE,
+  SSO_ENVIRONMENT,
+  SSO_REALM,
+  SSO_PROTOCOL,
+  COOKIE_DOMAIN,
+} = config;
 
 /**
  * Logs out the user and, once finished, redirects them to /auth/logout/callback
@@ -25,8 +34,16 @@ export const logout = async (req: IncomingMessage, res: ServerResponse, options?
     const { id_token } = urlParts.query;
 
     if (!id_token) {
-      // TODO: Redirect and clear cookie
-      res.writeHead(401, 'id_token query param required');
+      // Clear cookie
+      const cookie = formatCookie('refresh_token', '', {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'None',
+        domain: COOKIE_DOMAIN,
+        path: '/',
+      });
+      res.setHeader('Set-Cookie', cookie);
+      res.writeHead(302, { Location: FRONTEND_URL });
       return res.end();
     }
 

@@ -7,7 +7,7 @@
   "main": "build/index.js",
   "types": "build/bundle.d.ts",
   "scripts": {
-    "build": "npm run clean:prebuild && rollup -c rollup.config.mjs && npm run build:dts && npm run clean:postbuild",
+    "build": "npm run clean:prebuild && rollup -c rollup.config.mjs && rm -rf build/__tests__ && npm run build:dts && npm run clean:postbuild",
     "build:dts": "rollup -c rollupdts.config.mjs && node scripts/remove-dts-files.mjs",
     "clean:prebuild": "rm -rf .rollup.cache build tsconfig.tsbuildinfo",
     "clean:postbuild": "node scripts/remove-empty-dirs.mjs && rm -rf .rollup.cache tsconfig.tsbuildinfo",
@@ -21,6 +21,9 @@
     "test": "jest --passWithNoTests",
     "coverage": "jest --coverage --passWithNoTests",
     "coverage:open": "node scripts/run-coverage-and-open-report.mjs"
+  },
+  "dependencies": {
+    "@bcgov/citz-imb-sso-js-core": "file:./js-core.tgz"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "26.0.1",

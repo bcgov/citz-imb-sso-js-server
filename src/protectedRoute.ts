@@ -8,6 +8,7 @@ import {
   isJWTValid,
   normalizeUser,
 } from '@bcgov/citz-imb-sso-js-core';
+import { getHeaders } from 'src/utils/getHeaders';
 
 import config from './config';
 const { SSO_CLIENT_ID, SSO_CLIENT_SECRET } = config;
@@ -15,7 +16,7 @@ const { SSO_CLIENT_ID, SSO_CLIENT_SECRET } = config;
 export const protectedRoute = (roles?: string[], options?: ProtectedRouteOptions) => {
   return async (req: IncomingMessage, res: ServerResponse, next: Function) => {
     // Extract Authorization header
-    const header = req.headers['authorization'];
+    const header = getHeaders(req.rawHeaders).authorization;
     if (!header) {
       res.statusCode = 401;
       res.end(JSON.stringify({ error: 'No authorization header found.' }));

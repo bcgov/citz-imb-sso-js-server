@@ -6,6 +6,7 @@ import { SSOOptions } from '../types';
 import { parseCookies, formatCookie } from '../utils';
 import type { OriginalSSOUser, SSOEnvironment, SSOProtocol } from '@bcgov/citz-imb-sso-js-core';
 import { decodeJWT, getTokens, normalizeUser } from '@bcgov/citz-imb-sso-js-core';
+import { getHeaders } from 'src/utils/getHeaders';
 
 import config from '../config';
 const {
@@ -34,7 +35,7 @@ export const loginCallback = async (
     const urlParts = parse(req.url as string, true);
     const { code } = urlParts.query;
 
-    const { post_login_redirect_url } = parseCookies(req.headers.cookie);
+    const { post_login_redirect_url } = parseCookies(getHeaders(req.rawHeaders).cookie);
 
     const { access_token, refresh_token, refresh_expires_in } = await getTokens({
       code: code as string,

@@ -5,6 +5,7 @@ import { SSOOptions } from '../types';
 import type { SSOEnvironment, SSOProtocol } from '@bcgov/citz-imb-sso-js-core';
 import { getNewTokens } from '@bcgov/citz-imb-sso-js-core';
 import { parseCookies } from '../utils';
+import { getHeaders } from 'src/utils/getHeaders';
 
 import config from '../config';
 const { SSO_ENVIRONMENT, SSO_REALM, SSO_PROTOCOL, SSO_CLIENT_ID, SSO_CLIENT_SECRET } = config;
@@ -16,7 +17,7 @@ const { SSO_ENVIRONMENT, SSO_REALM, SSO_PROTOCOL, SSO_CLIENT_ID, SSO_CLIENT_SECR
  */
 export const token = async (req: IncomingMessage, res: ServerResponse, options?: SSOOptions) => {
   try {
-    const { refresh_token } = parseCookies(req.headers.cookie);
+    const { refresh_token } = parseCookies(getHeaders(req.rawHeaders).cookie);
 
     if (!refresh_token || refresh_token === '') {
       res.writeHead(401, 'Cookies must include refresh_token.');
